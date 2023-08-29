@@ -19,7 +19,7 @@ public interface UserService {
     //Get single user by id
     UserDTO getUserById(String id);
     //Get single user by email
-    UserDTO getUserByEmail(String email);
+   List <UserDTO> getUserByEmail(String email);
     //search user
     List<UserDTO> searchUserByName(String name);
 }

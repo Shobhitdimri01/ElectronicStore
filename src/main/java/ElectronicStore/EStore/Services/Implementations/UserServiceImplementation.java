@@ -17,7 +17,7 @@ public class UserServiceImplementation implements UserService {
 
     @Autowired
     private UserRepo u_repo;
-    @Autowired(required = true)
+    @Autowired
     private ModelMapper mapper;
     @Override
     public UserDTO createUser(UserDTO u) {
@@ -44,6 +44,7 @@ public class UserServiceImplementation implements UserService {
     @Override
     public String deleteUser(String id) {
         //Get user
+        System.out.println("ID ---->"+id);
         User user = u_repo.findById(id).orElseThrow(()->new RuntimeException("Id not found in database !!"));
         u_repo.delete(user);
         return "user record with id : "+id+" is deleted";
@@ -53,6 +54,7 @@ public class UserServiceImplementation implements UserService {
     public List<UserDTO> getAllUsers() {
         List<User> All_users = u_repo.findAll();
         List<UserDTO> collect = All_users.stream().map(u -> User_TO_UserDTO(u)).collect(Collectors.toList());
+        System.out.println("collect:"+collect);
         return collect;
     }
 
@@ -64,28 +66,30 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public UserDTO getUserByEmail(String email) {
-        User user = u_repo.findByEmail(email);
-        UserDTO u = User_TO_UserDTO(user);
+    public List<UserDTO> getUserByEmail(String email) {
+        List<User> user = u_repo.findByEmail(email);
+        List<UserDTO> u = user.stream().map(users->User_TO_UserDTO(users)).collect(Collectors.toList());
         return u;
     }
 
     @Override
     public List<UserDTO> searchUserByName(String name) {
+        System.out.println("NAME:"+name);
         List<User> user = u_repo.findByNameContaining(name);
         List<UserDTO> u = user.stream().map(users->User_TO_UserDTO(users)).collect(Collectors.toList());
         return u;
     }
 
     public User UserDTO_TO_User(UserDTO u){
-        //manual method to map object
+//        manual method to map object
 //        User users = User.builder()
 //                .user_Id(u.getUser_Id())
-//                .user_email(u.getUser_email())
-//                .user_gender(u.getUser_email())
-//                .user_password(u.getUser_password())
-//                .user_name(u.getUser_name())
+//                .email(u.getEmail())
+//                .gender(u.getGender())
+//                .password(u.getPassword())
+//                .name(u.getName())
 //                .build();
+//        return users;
         //automate method
 
         return mapper.map(u,User.class);
@@ -93,11 +97,12 @@ public class UserServiceImplementation implements UserService {
     public UserDTO User_TO_UserDTO(User u){
 //        UserDTO user_dto = UserDTO.builder()
 //                .user_Id(u.getUser_Id())
-//                .user_email(u.getUser_email())
-//                .user_gender(u.getUser_email())
-//                .user_password(u.getUser_password())
-//                .user_name(u.getUser_name())
+//                .email(u.getEmail())
+//                .gender(u.getGender())
+//                .password(u.getPassword())
+//                .name(u.getName())
 //                .build();
+//        return user_dto;
         return mapper.map(u, UserDTO.class);
     }
 }

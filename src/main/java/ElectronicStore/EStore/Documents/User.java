@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 @Builder
 @Document("users")
 public class User {
-
+    @Id
     private String user_Id;
     @Field("name")
     private String name;

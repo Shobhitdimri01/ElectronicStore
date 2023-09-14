@@ -1,8 +1,10 @@
 package ElectronicStore.EStore.Controllers;
 
 import ElectronicStore.EStore.DataTransferObject.APIResponseMessage;
+import ElectronicStore.EStore.DataTransferObject.PageableResponse;
 import ElectronicStore.EStore.DataTransferObject.UserDTO;
 import ElectronicStore.EStore.Services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +21,7 @@ public class UserController {
 
 //Create user
     @PostMapping("/create")
-    public ResponseEntity<APIResponseMessage>Create(@RequestBody UserDTO u){
+    public ResponseEntity<APIResponseMessage>Create(@Valid @RequestBody UserDTO u){
         List<UserDTO> message = new ArrayList<>();
         UserDTO user = user_service.createUser(u);
         message.add(user);
@@ -27,8 +29,14 @@ public class UserController {
     }
 
     @GetMapping("/get_all")
-    public ResponseEntity<APIResponseMessage>GetAllUsers(){
-        return new ResponseEntity<>( APIResponseMessage.builder().message(user_service.getAllUsers()).status(HttpStatus.CREATED).success(true).build(),HttpStatus.OK);
+    public ResponseEntity<PageableResponse<UserDTO>>GetAllUsers(
+            @RequestParam(value = "pageNumber",defaultValue = "0",required = false)int pageNumber,
+            @RequestParam(value = "pageSize",defaultValue = "10",required = false)int pageSize,
+            @RequestParam(value = "sortby",defaultValue = "name",required = false)String sortby,
+            @RequestParam(value = "sortdir",defaultValue = "asc",required = false)String sortdir
+
+    ){
+        return new ResponseEntity<>(user_service.getAllUsers(pageNumber,pageSize,sortby,sortdir),HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
@@ -67,6 +75,8 @@ public class UserController {
     @GetMapping("/name")
     public ResponseEntity<APIResponseMessage> searchUserByName(@RequestParam String name){
         List<UserDTO> message = user_service.searchUserByName(name);
-        return new ResponseEntity<>(APIResponseMessage.builder().message(message).success(true).status(HttpStatus.ACCEPTED).success(true).build(),HttpStatus.ACCEPTED);
+        ArrayList mess  = new ArrayList<>();
+        mess.add(message);
+        return new ResponseEntity<>(APIResponseMessage.builder().message(mess).success(true).status(HttpStatus.ACCEPTED).success(true).build(),HttpStatus.ACCEPTED);
     }
 }

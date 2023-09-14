@@ -1,11 +1,18 @@
 package ElectronicStore.EStore.Services.Implementations;
 
+import ElectronicStore.EStore.DataTransferObject.PageableResponse;
 import ElectronicStore.EStore.DataTransferObject.UserDTO;
 import ElectronicStore.EStore.Documents.User;
+import ElectronicStore.EStore.Exceptions.CustomResourceNotFoundExceptions;
+import ElectronicStore.EStore.Helper.Helper;
 import ElectronicStore.EStore.Repositories.UserRepo;
 import ElectronicStore.EStore.Services.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,7 +38,7 @@ public class UserServiceImplementation implements UserService {
 
     @Override
     public UserDTO updateUser(UserDTO u,String id) {
-        User user = u_repo.findById(id).orElseThrow(()->new RuntimeException("User with id: "+id+" not found!!"));
+        User user = u_repo.findById(id).orElseThrow(()->new CustomResourceNotFoundExceptions("User with id: "+id+" not found!!"));
         user.setName(u.getName());
         user.setGender(u.getGender());
         user.setEmail(u.getEmail());
@@ -51,16 +58,18 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public List<UserDTO> getAllUsers() {
-        List<User> All_users = u_repo.findAll();
-        List<UserDTO> collect = All_users.stream().map(u -> User_TO_UserDTO(u)).collect(Collectors.toList());
-        System.out.println("collect:"+collect);
-        return collect;
+    public PageableResponse<UserDTO> getAllUsers(int pageNumber, int pageSize, String sortby, String sortdir) {
+        Sort sort = (sortdir.equalsIgnoreCase("desc")) ? (Sort.by(sortby).descending() ): (Sort.by(sortby).ascending());
+
+        Pageable pageable = PageRequest.of(pageNumber,pageSize,sort);
+        Page<User> All_users = u_repo.findAll(pageable);
+        PageableResponse<UserDTO> pageableResponse = Helper.getPageableResponse(All_users, UserDTO.class);
+        return pageableResponse;
     }
 
     @Override
     public UserDTO getUserById(String id) {
-        User user = u_repo.findById(id).orElseThrow(() -> new RuntimeException("User with id : " + id + " doesn't exists!"));
+        User user = u_repo.findById(id).orElseThrow(() -> new CustomResourceNotFoundExceptions("User with id : " + id + " doesn't exists!"));
         UserDTO u = User_TO_UserDTO(user);
         return u;
     }
@@ -75,7 +84,7 @@ public class UserServiceImplementation implements UserService {
     @Override
     public List<UserDTO> searchUserByName(String name) {
         System.out.println("NAME:"+name);
-        List<User> user = u_repo.findByNameContaining(name);
+            List<User> user = u_repo.findByNameContaining(name);
         List<UserDTO> u = user.stream().map(users->User_TO_UserDTO(users)).collect(Collectors.toList());
         return u;
     }

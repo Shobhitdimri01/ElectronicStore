@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,13 +25,15 @@ public class UserServiceImplementation implements UserService {
 
     @Autowired
     private UserRepo u_repo;
+@Autowired
+    private PasswordEncoder passwordEncoder;
     @Autowired
     private ModelMapper mapper;
     @Override
     public UserDTO createUser(UserDTO u) {
         u.setUser_Id(UUID.randomUUID().toString());
+        u.setPassword(passwordEncoder.encode(u.getPassword()));
         User user = UserDTO_TO_User(u);
-        System.out.println("user:"+user.getEmail()+" "+user.getName()+" "+user.getPassword()+" "+user.getGender());
         User save = u_repo.save(user);
         UserDTO user_dto = User_TO_UserDTO(save);
         return user_dto;
@@ -42,7 +45,7 @@ public class UserServiceImplementation implements UserService {
         user.setName(u.getName());
         user.setGender(u.getGender());
         user.setEmail(u.getEmail());
-        user.setPassword(u.getPassword());
+        user.setPassword(passwordEncoder.encode(u.getPassword()));
         User update_user = u_repo.save(user);
         UserDTO user_dto=User_TO_UserDTO(update_user);
         return user_dto;
@@ -60,7 +63,6 @@ public class UserServiceImplementation implements UserService {
     @Override
     public PageableResponse<UserDTO> getAllUsers(int pageNumber, int pageSize, String sortby, String sortdir) {
         Sort sort = (sortdir.equalsIgnoreCase("desc")) ? (Sort.by(sortby).descending() ): (Sort.by(sortby).ascending());
-
         Pageable pageable = PageRequest.of(pageNumber,pageSize,sort);
         Page<User> All_users = u_repo.findAll(pageable);
         PageableResponse<UserDTO> pageableResponse = Helper.getPageableResponse(All_users, UserDTO.class);
@@ -83,7 +85,6 @@ public class UserServiceImplementation implements UserService {
 
     @Override
     public List<UserDTO> searchUserByName(String name) {
-        System.out.println("NAME:"+name);
             List<User> user = u_repo.findByNameContaining(name);
         List<UserDTO> u = user.stream().map(users->User_TO_UserDTO(users)).collect(Collectors.toList());
         return u;

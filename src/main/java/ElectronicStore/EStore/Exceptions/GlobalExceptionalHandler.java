@@ -22,6 +22,7 @@ public class GlobalExceptionalHandler {
    @ ExceptionHandler(CustomResourceNotFoundExceptions.class)
     public ResponseEntity<APIResponseMessage> CustomResNotFound(CustomResourceNotFoundExceptions ex){
         ArrayList message = new ArrayList<>();
+       message.add("Error : \n");
         message.add(ex.getMessage());
         APIResponseMessage resp = APIResponseMessage.builder().message(message).status(HttpStatus.NOT_FOUND).success(false).build();
         return new ResponseEntity(resp, HttpStatus.NOT_FOUND);
@@ -37,6 +38,14 @@ public class GlobalExceptionalHandler {
             response.put(field,defaultMessage);
         });
         return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+    }
+    @ ExceptionHandler(BadAPIRequest.class)
+    public ResponseEntity<APIResponseMessage> HandleBadAPIReq(CustomResourceNotFoundExceptions ex){
+        ArrayList message = new ArrayList<>();
+        message.add("Error : \n");
+        message.add(ex.getMessage());
+        APIResponseMessage resp = APIResponseMessage.builder().message(message).status(HttpStatus.BAD_REQUEST).success(false).build();
+        return new ResponseEntity(resp, HttpStatus.BAD_REQUEST);
     }
 
 }

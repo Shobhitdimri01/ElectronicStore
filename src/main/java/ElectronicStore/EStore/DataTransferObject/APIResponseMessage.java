@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class APIResponseMessage {
-    private List<UserDTO> message;
+    private List<?> message;
     private boolean success;
     private HttpStatus status;
 
